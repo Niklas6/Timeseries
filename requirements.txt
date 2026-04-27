@@ -1,0 +1,7 @@
+# Third-party dependencies used across the notebooks and scripts.
+numpy
+pandas
+matplotlib
+yfinance
+statsmodels
+requests
