@@ -19,8 +19,8 @@ The objective of the project is not to present a production-ready or consistentl
 
 1. Download and prepare historical semiconductor stock data
 2. Split the dataset into analysis and trading periods
-3. Explore relationships between stock prices and returns
-4. Select candidate pairs for relative-value testing
+3. Explore relationships between stock prices and returns 
+4. Select candidate pairs for relative-value testing by comparing correlation and cointegration
 5. Implement a threshold-based pairs trading model
 6. Evaluate results across multiple stock pairs
 
