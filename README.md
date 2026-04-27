@@ -32,3 +32,4 @@ S2_Data_analysis.ipynb  # Explores relationships between stocks and identifies c
 S3_Pairs_trading.py     # Contains the core pairs trading strategy implementation on the analysis data and test data set
 S4_Evaluation.ipynb     # Evaluates strategy performance on selected pairs
 Data/                   # Stores processed datasets used in the project
+```
