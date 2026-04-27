@@ -9,7 +9,8 @@ class pairmodel:
     left: str #= 'LRCX'
     right: str #= 'AMAT'
     gamma: float =1/2
-    threshold: float =1/50
+    threshold_entry: float =1/100
+    #threshold_exit: float =1/10
     #max_exposure: float =200
 
 
@@ -28,7 +29,7 @@ def run_strategy(prices: pd.DataFrame,model: pairmodel) -> tuple[ float, int, pa
     revenue=0
     trades=0
     for t in prices.index:
-        npos = build_target_position( prices.loc[t,left], prices.loc[t,right], model.gamma,model.threshold,pos)
+        npos = build_target_position( prices.loc[t,left], prices.loc[t,right], model.gamma,model.threshold_entry,pos)
         if npos != pos:
             revenue += prices.loc[t,left] * (pos.left - npos.left) + prices.loc[t,right] * (pos.right - npos.right)
             pos = npos
@@ -49,14 +50,16 @@ def build_target_position(y1: float, y2: float, gamma: float, thresh: float, pos
     elif pos.left < 0:
         if y1 - gamma * y2 > 0:
             return pos
+    capital = 100
+    #scale = capital / ((y1 + y2) * (1 + gamma))
     if y1 - gamma * y2 > thresh * (y1 + gamma * y2):  # y1 is overvalued
         if pos.left >= 0:
-            npos.left = -float(1 / (y1 + y2)/(1+gamma) * (100))
-            npos.right = float(1 / (y1 + y2)/(1+gamma) * gamma * (100))
+            npos.left = -capital/y1
+            npos.right = capital/y2
     elif y1 - gamma * y2 < - thresh * (y1 + gamma * y2):  # y2 is overvalued
         if pos.left <= 0:
-            npos.left = float(1 / (y1 + y2)/(1+gamma) * (100))
-            npos.right= -float(1 / (y1 + y2/(1+gamma) * gamma * (100)))
+            npos.left = capital/y1
+            npos.right= -capital/y2
     return npos
 
 def build_model(prices_analysis: pd.DataFrame, left: str, right: str):
@@ -79,8 +82,8 @@ def run_analysis_trade_model(prices_analysis: pd.DataFrame,prices_trading: pd.Da
 
 def main(left: str = 'LRCX',right: str = 'AMAT') -> None:
 
-    prices_analysis = pd.read_csv("semiconductor_close_analysis.csv", index_col="date", parse_dates=True).sort_index().loc[:,[left, right ]]
-    prices_trading = pd.read_csv("semiconductor_close_trade.csv", index_col="date", parse_dates=True).sort_index().loc[:,[left, right ]]
+    prices_analysis = pd.read_csv("Data/semiconductor_close_analysis.csv", index_col="date", parse_dates=True).sort_index().loc[:,[left, right ]]
+    prices_trading = pd.read_csv("Data/semiconductor_close_trade.csv", index_col="date", parse_dates=True).sort_index().loc[:,[left, right ]]
     #categories = pd.read_csv("categories.csv", index_col="ticker")
     revenue_analysis, trades_analysis,revenue_trading, trades_trading=run_analysis_trade_model(prices_analysis,prices_trading,left, right )
 
