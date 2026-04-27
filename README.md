@@ -1,4 +1,5 @@
 **Semiconductor Pairs Trading Research Pipeline**
+
 This project is a Python-based research pipeline for exploring a simple pairs trading strategy in the semiconductor sector. It downloads historical market data, analyzes relationships between stocks, builds a rule-based mean-reversion strategy, and evaluates its performance on a separate out-of-sample trading period.
 
 The goal of the project is not to claim a profitable production strategy, but to demonstrate the ability to design and implement a complete quantitative research workflow. The repository covers data collection, exploratory analysis, strategy construction, and backtest evaluation using real equity price data.
