@@ -1,13 +1,12 @@
 
-import numpy as np
 import pandas as pd
 from dataclasses import dataclass
 
 
 @dataclass(slots=True)
-class pairmodel:
-    left: str #= 'LRCX'
-    right: str #= 'AMAT'
+class PairModel:
+    left: str
+    right: str
     gamma: float =1/2
     threshold_entry: float =1/100
     #threshold_exit: float =1/10
@@ -15,15 +14,17 @@ class pairmodel:
 
 
 @dataclass(slots=True)
-class position:
+class Position:
     left: float = 0.0
     right: float = 0.0
 
 
 
 
-def run_strategy(prices: pd.DataFrame,model: pairmodel) -> tuple[ float, int, pairmodel]:
-    pos = position()
+def run_strategy(prices: pd.DataFrame,model: PairModel) -> tuple[ float, int, PairModel]:
+    '''This function runes the pair trading stategy over a data frame and returns the revenue, trades, updated model'''
+
+    pos = Position()
     left = model.left
     right = model.right
     revenue=0
@@ -42,8 +43,9 @@ def run_strategy(prices: pd.DataFrame,model: pairmodel) -> tuple[ float, int, pa
 
 
 
-def build_target_position(y1: float, y2: float, gamma: float, thresh: float, pos: position) -> position:
-    npos=position()
+def build_target_position(y1: float, y2: float, gamma: float, thresh: float, pos: Position) -> Position:
+    '''This model updates the position applied to each time stamp.'''
+    npos=Position()
     if pos.left > 0:
         if y1 - gamma * y2 < 0:
             return pos
@@ -51,7 +53,7 @@ def build_target_position(y1: float, y2: float, gamma: float, thresh: float, pos
         if y1 - gamma * y2 > 0:
             return pos
     capital = 100
-    #scale = capital / ((y1 + y2) * (1 + gamma))
+
     if y1 - gamma * y2 > thresh * (y1 + gamma * y2):  # y1 is overvalued
         if pos.left >= 0:
             npos.left = -capital/y1
@@ -63,40 +65,34 @@ def build_target_position(y1: float, y2: float, gamma: float, thresh: float, pos
     return npos
 
 def build_model(prices_analysis: pd.DataFrame, left: str, right: str):
+    '''This function builds the model using the mean.'''
     gamma = (prices_analysis.loc[:,left] / prices_analysis.loc[:,right]).mean()
-    return pairmodel(left,right, gamma)
+    return PairModel(left,right, gamma)
 
 
-def run_analysis_trade_model(prices_analysis: pd.DataFrame,prices_trading: pd.DataFrame, left: str, right: str):
-
+def run_analysis_test_model(prices_analysis: pd.DataFrame,prices_test: pd.DataFrame, left: str, right: str):
+    '''This function runs the analysis and test.'''
 
     model=build_model(prices_analysis,left,right)
 
     revenue_analysis, trades_analysis,model_analysis=run_strategy(prices_analysis,model)
-    revenue_trading, trades_trading,model_trade=run_strategy(prices_trading,model_analysis)
+    revenue_test, trades_test,model_test=run_strategy(prices_test,model_analysis)
 
-    return(revenue_analysis, trades_analysis,revenue_trading, trades_trading)
-
-
+    return(revenue_analysis, trades_analysis,revenue_test, trades_test)
 
 
-def main(left: str = 'LRCX',right: str = 'AMAT') -> None:
+
+
+def main(left: str = 'LRCX',right: str = 'AMAT'):
 
     prices_analysis = pd.read_csv("Data/semiconductor_close_analysis.csv", index_col="date", parse_dates=True).sort_index().loc[:,[left, right ]]
-    prices_trading = pd.read_csv("Data/semiconductor_close_trade.csv", index_col="date", parse_dates=True).sort_index().loc[:,[left, right ]]
-    #categories = pd.read_csv("categories.csv", index_col="ticker")
-    revenue_analysis, trades_analysis,revenue_trading, trades_trading=run_analysis_trade_model(prices_analysis,prices_trading,left, right )
+    prices_test = pd.read_csv("Data/semiconductor_close_trade.csv", index_col="date", parse_dates=True).sort_index().loc[:,[left, right ]]
+    revenue_analysis, trades_analysis,revenue_test, trades_test=run_analysis_test_model(prices_analysis,prices_test,left, right )
 
 
 
 
-    return(revenue_analysis, trades_analysis,revenue_trading, trades_trading)
-    #model, revenue = run_train_test_strategy(
-    #    train_prices=prices_analysis,
-    #    test_prices=prices_trading,
-    #    left=args.left,
-    #    right=args.right,
-    #)
+    return(revenue_analysis, trades_analysis,revenue_test, trades_test)
 
 
 
